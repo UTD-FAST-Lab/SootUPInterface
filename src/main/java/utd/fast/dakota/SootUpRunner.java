@@ -31,6 +31,7 @@ import sootup.java.core.JavaSootClass;
 import sootup.java.core.JavaSootClassSource;
 import sootup.java.core.language.JavaLanguage;
 import sootup.java.core.views.JavaView;
+import java.nio.file.Paths;
 
 public class SootUpRunner 
 {
@@ -60,7 +61,7 @@ public class SootUpRunner
     private void runSootUp() {
         //Method that runs soot up on targetPath
         //from sootup tutorial...
-        Path resolvedTargetPath = Path.of(targetPath);
+        Path resolvedTargetPath = Paths.get(targetPath);
         JavaLanguage language = new JavaLanguage(8);
         AnalysisInputLocation<JavaSootClass> inLoc = new PathBasedAnalysisInputLocation(resolvedTargetPath, SourceType.Application);
         AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
