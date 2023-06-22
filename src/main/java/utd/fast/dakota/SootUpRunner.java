@@ -5,11 +5,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
-
+import java.io.IOException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
+import java.io.FileInputStream;
 import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
 import sootup.callgraph.ClassHierarchyAnalysisAlgorithm;
@@ -32,6 +32,7 @@ import sootup.java.core.JavaSootClassSource;
 import sootup.java.core.language.JavaLanguage;
 import sootup.java.core.views.JavaView;
 import java.nio.file.Paths;
+import java.util.jar.JarInputStream;
 
 public class SootUpRunner 
 {
@@ -54,16 +55,18 @@ public class SootUpRunner
         }catch(CmdLineException e){
             e.printStackTrace();
             return;
+        }catch(IOException e){
+            e.printStackTrace();
         }
 
     }
 
-    private void runSootUp() {
+    private void runSootUp() throws IOException{
         //Method that runs soot up on targetPath
         //from sootup tutorial...
         Path resolvedTargetPath = Paths.get(targetPath);
-        JavaLanguage language = new JavaLanguage(8);
-        AnalysisInputLocation<JavaSootClass> inLoc = new PathBasedAnalysisInputLocation(resolvedTargetPath, SourceType.Application);
+        JavaLanguage language = new JavaLanguage(11);
+        AnalysisInputLocation<JavaSootClass> inLoc = new JavaClassPathAnalysisInputLocation(resolvedTargetPath.toFile().getAbsolutePath());
         AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
             System.getProperty("java.home")+"/lib/jrt-fs.jar");
         //AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
@@ -79,18 +82,40 @@ public class SootUpRunner
 
         JavaView view = (JavaView) project.createFullView();
         
-        ClassType classType = project.getIdentifierFactory().getClassType("cs.utd.soles.App");
+        //ClassType classType = project.getIdentifierFactory().getClassType("cs.utd.soles.App");
 
-        SootClass<JavaSootClassSource> mainClass = (SootClass<JavaSootClassSource>) view.getClass(classType).get();
+        //SootClass<JavaSootClassSource> mainClass = (SootClass<JavaSootClassSource>) view.getClass(classType).get();
         
 
-        System.out.println("");
+        JarInputStream jarStream = new JarInputStream(new FileInputStream(resolvedTargetPath.toFile()));
+        String entry = jarStream.getManifest().getMainAttributes().getValue("Main-Class");
+        jarStream.close();
+
+        ClassType classType = project.getIdentifierFactory().getClassType(entry);
+
+        System.out.println(classType.toString());
+
+        SootClass<JavaSootClassSource> sootClass = (SootClass<JavaSootClassSource>) view.getClass(classType).get();
+
+        MethodSignature entryMethodSignature = JavaIdentifierFactory.getInstance()
+            .getMethodSignature(
+                classType,
+                "main",
+                "void",
+                Collections.singletonList("java.lang.String[]")
+            );
+
+        view.getMethod(entryMethodSignature);
+
+
+
+        //System.out.println("");
         //MethodSubSignature entrySubSignature = JavaIdentifierFactory.getInstance()
         //    .getMethodSubSignature("main", VoidType.getInstance(), String.type));
-        MethodSignature entryMethodSignature = JavaIdentifierFactory.getInstance()
-            .getMethodSignature(classType, "main", "void", Collections.singletonList("java.lang.String[]"));
+        //MethodSignature entryMethodSignature = JavaIdentifierFactory.getInstance()
+        //    .getMethodSignature(classType, "main", "void", Collections.singletonList("java.lang.String[]"));
             //.getMethodSignature("main","void",classtype,Collections.singletonList("java.lang.String[]"));
-        view.getMethod(entryMethodSignature);
+        //view.getMethod(entryMethodSignature);
 
 
 
@@ -111,12 +136,8 @@ public class SootUpRunner
 
         String dotstring = "digraph callgraph {\n";
         for(MethodSignature ms: mss){
-            if(!ms.toString().contains("cs.utd.soles"))
-                continue;
             Set<MethodSignature> outCalls= cg.callsFrom(ms);
             for(MethodSignature outCall: outCalls){
-                if(!outCall.toString().contains("cs.utd.soles"))
-                    continue;
                 dotstring+="\""+ms.toString()+"\" -> \""+outCall.toString()+"\";\n";
                 
             }

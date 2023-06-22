@@ -20,7 +20,6 @@ public class App {
     public static void bad_foo(int x){
         int i=0;
         i = i /x;
-
     }
     public static void bar(){
         startServer();
