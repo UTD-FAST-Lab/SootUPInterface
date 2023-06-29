@@ -69,8 +69,7 @@ public class SootUpRunner
         AnalysisInputLocation<JavaSootClass> inLoc = new JavaClassPathAnalysisInputLocation(resolvedTargetPath.toFile().getAbsolutePath());
         //AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
         //    System.getProperty("java.home")+"/lib/jrt-fs.jar");
-        AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
-            System.getProperty("java.home")+"/lib/rt.jar");
+        AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation("/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/rt.jar");
         JavaProject project = JavaProject.builder(language)
             .addInputLocation(inLoc).build();
         //    .addInputLocation(rtLoc)
