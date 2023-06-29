@@ -65,16 +65,16 @@ public class SootUpRunner
         //Method that runs soot up on targetPath
         //from sootup tutorial...
         Path resolvedTargetPath = Paths.get(targetPath);
-        JavaLanguage language = new JavaLanguage(11);
+        JavaLanguage language = new JavaLanguage(8);
         AnalysisInputLocation<JavaSootClass> inLoc = new JavaClassPathAnalysisInputLocation(resolvedTargetPath.toFile().getAbsolutePath());
-        AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
-            System.getProperty("java.home")+"/lib/jrt-fs.jar");
         //AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
-        //    "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar");
+        //    System.getProperty("java.home")+"/lib/jrt-fs.jar");
+        AnalysisInputLocation<JavaSootClass> rtLoc = new JavaClassPathAnalysisInputLocation(
+            System.getProperty("java.home")+"/lib/rt.jar");
         JavaProject project = JavaProject.builder(language)
-            .addInputLocation(inLoc)
-            .addInputLocation(rtLoc)
-            .build();
+            .addInputLocation(inLoc).build();
+        //    .addInputLocation(rtLoc)
+            
 
 
 
@@ -93,7 +93,7 @@ public class SootUpRunner
 
         ClassType classType = project.getIdentifierFactory().getClassType(entry);
 
-        System.out.println(classType.toString());
+        //System.out.println(classType.toString());
 
         SootClass<JavaSootClassSource> sootClass = (SootClass<JavaSootClassSource>) view.getClass(classType).get();
 
